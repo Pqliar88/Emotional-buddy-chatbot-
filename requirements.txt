@@ -1,0 +1,9 @@
+flask
+flask-cors
+requests
+python-dotenv
+tensorflow 
+numpy 
+librosa 
+soundfile
+pickle-mixin

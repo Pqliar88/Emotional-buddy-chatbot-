@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emotional Buddy AI</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------
+      Design System: Midnight Companion (Light + Dark)
+    -------------------------- */
+    :root {
+      --font: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 14px;
+
+      --shadow-soft: 0 18px 60px rgba(0,0,0,0.18);
+      --shadow-card: 0 10px 24px rgba(0,0,0,0.12);
+      --shadow-bubble: 0 8px 18px rgba(0,0,0,0.10);
+
+      --translucent: rgba(255,255,255,0.55);
+      --blur: blur(12px);
+
+      /* Light theme */
+      --bg0: #f7f7fb;
+      --bg1: #eef0ff;
+      --panel: rgba(255,255,255,0.75);
+      --panelBorder: rgba(30,41,59,0.10);
+
+      --text: #0f172a;
+      --muted: rgba(15,23,42,0.66);
+
+      --bubbleBot: rgba(255,255,255,0.85);
+      --bubbleUser: linear-gradient(135deg, rgba(79,70,229,0.95), rgba(168,85,247,0.92));
+      --bubbleBotText: #0f172a;
+      --bubbleUserText: rgba(255,255,255,0.98);
+
+      --accent: #7c3aed;
+      --accent2: #4f46e5;
+      --ring: rgba(124,58,237,0.28);
+
+      --inputBg: rgba(255,255,255,0.92);
+      --inputBorder: rgba(15,23,42,0.14);
+
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    [data-theme="dark"] {
+      --bg0: #070a14;
+      --bg1: #0b1224;
+      --panel: rgba(17, 24, 39, 0.62);
+      --panelBorder: rgba(148,163,184,0.14);
+
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.62);
+
+      --bubbleBot: rgba(17, 24, 39, 0.72);
+      --bubbleUser: linear-gradient(135deg, rgba(99,102,241,0.92), rgba(217,70,239,0.80));
+      --bubbleBotText: rgba(255,255,255,0.92);
+      --bubbleUserText: rgba(255,255,255,0.98);
+
+      --accent: #a78bfa;
+      --accent2: #60a5fa;
+      --ring: rgba(167,139,250,0.28);
+
+      --inputBg: rgba(2,6,23,0.70);
+      --inputBorder: rgba(148,163,184,0.18);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 900px at 20% 10%, rgba(124,58,237,0.25), transparent 60%),
+        radial-gradient(900px 700px at 85% 25%, rgba(79,70,229,0.22), transparent 55%),
+        radial-gradient(900px 700px at 50% 100%, rgba(16,185,129,0.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .aurora {
+      position: fixed;
+      inset: -40%;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(124,58,237,0.16), transparent 45%),
+        radial-gradient(circle at 70% 40%, rgba(79,70,229,0.14), transparent 45%),
+        radial-gradient(circle at 50% 70%, rgba(16,185,129,0.08), transparent 50%);
+      filter: blur(60px);
+      transform: translateZ(0);
+      animation: drift 12s ease-in-out infinite alternate;
+      opacity: 0.9;
+    }
+    @keyframes drift {
+      from { transform: translate3d(-1.5%, -1.2%, 0) scale(1.02); }
+      to   { transform: translate3d( 1.5%,  1.2%, 0) scale(1.04); }
+    }
+
+    .app {
+      width: min(980px, 96vw);
+      height: min(86vh, 820px);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      border: 1px solid var(--panelBorder);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--panelBorder);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), transparent);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.88), rgba(217,70,239,0.74));
+      box-shadow: 0 10px 24px rgba(124,58,237,0.25);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 22px;
+      flex: 0 0 auto;
+    }
+
+    .brandText { min-width: 0; }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .subtitle {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .headerRight {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--panelBorder);
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .iconBtn {
+      border: 1px solid var(--panelBorder);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 14px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+      user-select: none;
+    }
+    .iconBtn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+    .iconBtn:active { transform: translateY(0px) scale(0.98); }
+    .iconBtn:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+    .messages {
+      padding: 18px;
+      overflow: auto;
+      scroll-behavior: smooth;
+      background:
+        radial-gradient(900px 400px at 20% 0%, rgba(124,58,237,0.08), transparent 60%),
+        radial-gradient(700px 380px at 80% 10%, rgba(79,70,229,0.06), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    }
+
+    .messages::-webkit-scrollbar { width: 10px; }
+    .messages::-webkit-scrollbar-thumb {
+      background: rgba(148,163,184,0.28);
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0);
+      background-clip: content-box;
+    }
+    .messages::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.40); background-clip: content-box; }
+
+    .emptyState {
+      border: 1px dashed var(--panelBorder);
+      background: rgba(255,255,255,0.06);
+      padding: 14px 14px;
+      border-radius: var(--radius-lg);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .msgRow {
+      display: flex;
+      gap: 10px;
+      margin: 12px 0;
+      align-items: flex-end;
+      animation: popIn 0.18s ease-out;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msgRow.user { justify-content: flex-end; }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid var(--panelBorder);
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      font-size: 18px;
+    }
+
+    .bubbleWrap {
+      max-width: min(74%, 640px);
+      display: grid;
+      gap: 6px;
+    }
+    .bubble {
+      position: relative;
+      padding: 12px 14px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-bubble);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    .bubble.bot {
+      background: var(--bubbleBot);
+      color: var(--bubbleBotText);
+      border: 1px solid rgba(148,163,184,0.14);
+    }
+    .bubble.user {
+      background: var(--bubbleUser);
+      color: var(--bubbleUserText);
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+
+    .bubble.bot::after {
+      content: "";
+      position: absolute;
+      left: -6px;
+      bottom: 10px;
+      width: 14px;
+      height: 14px;
+      background: var(--bubbleBot);
+      border-left: 1px solid rgba(148,163,184,0.14);
+      border-bottom: 1px solid rgba(148,163,184,0.14);
+      transform: rotate(45deg);
+      border-bottom-left-radius: 4px;
+    }
+    .bubble.user::after {
+      content: "";
+      position: absolute;
+      right: -6px;
+      bottom: 10px;
+      width: 14px;
+      height: 14px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.92), rgba(217,70,239,0.80));
+      border-right: 1px solid rgba(255,255,255,0.16);
+      border-top: 1px solid rgba(255,255,255,0.16);
+      transform: rotate(45deg);
+      border-top-right-radius: 4px;
+    }
+
+    .meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 0 4px;
+    }
+    .meta .dot {
+      width: 4px; height: 4px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.55);
+    }
+
+    .typingDots {
+      display: inline-flex;
+      gap: 6px;
+      padding: 4px 2px;
+      align-items: center;
+    }
+    .typingDots span {
+      width: 6px; height: 6px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.65);
+      animation: blink 1s infinite ease-in-out;
+    }
+    .typingDots span:nth-child(2) { animation-delay: 0.15s; }
+    .typingDots span:nth-child(3) { animation-delay: 0.30s; }
+    @keyframes blink {
+      0%, 100% { transform: translateY(0); opacity: 0.55; }
+      50% { transform: translateY(-3px); opacity: 1; }
+    }
+
+    .composer {
+      border-top: 1px solid var(--panelBorder);
+      padding: 14px;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.05));
+      display: grid;
+      gap: 10px;
+    }
+
+    .composerInner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .inputShell {
+      border: 1px solid var(--inputBorder);
+      background: var(--inputBg);
+      border-radius: 18px;
+      padding: 10px 10px;
+      display: grid;
+      gap: 8px;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+    }
+    .inputShell:focus-within { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+    textarea {
+      width: 100%;
+      resize: none;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 42px;
+      max-height: 140px;
+      padding: 2px 4px;
+    }
+    textarea::placeholder { color: rgba(148,163,184,0.9); }
+
+    .composerActions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      transition: transform 0.12s ease, filter 0.12s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btnPrimary {
+      background: linear-gradient(135deg, rgba(79,70,229,0.95), rgba(217,70,239,0.86));
+      color: white;
+      box-shadow: 0 14px 28px rgba(124,58,237,0.25);
+    }
+    .btnPrimary:hover { filter: brightness(1.02); transform: translateY(-1px); }
+
+    .btnGhost {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--panelBorder);
+      color: var(--text);
+      padding: 12px 12px;
+      width: 52px;
+      justify-content: center;
+    }
+    .btnGhost:hover { transform: translateY(-1px); }
+
+    .helperLine {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .hidden { display: none !important; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      z-index: 9999;
+    }
+    .modalCard {
+      width: min(420px, 96vw);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      border: 1px solid var(--panelBorder);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      padding: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+    .modalCard::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(124,58,237,0.22), transparent 45%),
+        radial-gradient(circle at 70% 40%, rgba(79,70,229,0.20), transparent 45%);
+      filter: blur(50px);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .modalInner { position: relative; z-index: 1; }
+
+    .modalTitle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .modalText {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .nameInput {
+      width: 100%;
+      border-radius: 16px;
+      padding: 12px 12px;
+      border: 1px solid var(--inputBorder);
+      background: var(--inputBg);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .nameInput:focus { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Recording pill */
+    .recordPill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(239,68,68,0.25);
+      background: rgba(239,68,68,0.10);
+      color: rgba(239,68,68,0.95);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .pulseDot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(239,68,68,0.95);
+      box-shadow: 0 0 0 0 rgba(239,68,68,0.50);
+      animation: pulse 1.2s infinite ease-out;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+      100% { box-shadow: 0 0 0 12px rgba(239,68,68,0.00); }
+    }
+
+    @media (max-width: 520px) {
+      .bubbleWrap { max-width: 88%; }
+      .subtitle { display: none; }
+      .chip { display: none; }
+    }
+
+    .intentBar {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--panelBorder);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+    }
+    .intentBar .btnGhost {
+      width: auto;
+      padding: 10px 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="aurora"></div>
+
+  <!-- Welcome Modal -->
+  <div class="modal" id="modal">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+      <div class="modalInner">
+        <h2 class="modalTitle" id="welcomeTitle">🤗 Welcome</h2>
+        <p class="modalText">This is your calm space. What should I call you?</p>
+
+        <input class="nameInput" type="text" id="nameInput" placeholder="Enter your name" autocomplete="name" />
+
+        <div class="row">
+          <button class="btn btnGhost" id="modalThemeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+          <button class="btn btnPrimary" id="startBtn" type="button">
+            Start <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <main class="app" id="app" aria-label="Emotional Buddy AI chat">
+    <header class="header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🤗</div>
+        <div class="brandText">
+          <p class="title">Emotional Buddy AI</p>
+          <p class="subtitle">A quiet, safe space to talk — text or voice.</p>
+        </div>
+      </div>
+
+      <div class="headerRight">
+        <div class="chip" id="whoChip">Not started</div>
+        <button class="iconBtn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <section class="messages" id="messages">
+      <div class="emptyState" id="emptyState">
+        <b>I’m here.</b> Take your time. If you want, start with one sentence:
+        <br/>“Right now, I feel…”
+      </div>
+
+      <div class="msgRow bot">
+        <div class="avatar" aria-hidden="true">🤗</div>
+        <div class="bubbleWrap">
+          <div class="bubble bot">Hi. I’m here to listen and support you. Tell me what’s on your mind — we’ll take it one step at a time.</div>
+          <div class="meta"><span>Buddy</span><span class="dot"></span><span id="bootTime"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="composer" id="composer">
+      <div class="helperLine">
+        <span id="recordStatus" class="hidden">
+          <span class="recordPill"><span class="pulseDot"></span> Recording…</span>
+        </span>
+        <span>Enter = send · Shift+Enter = new line</span>
+      </div>
+
+      <div id="intentMount"></div>
+
+      <div class="composerInner">
+        <div class="inputShell">
+          <textarea id="userInput" placeholder="Type anything you’re feeling…" disabled></textarea>
+        </div>
+
+        <div class="composerActions">
+          <button class="btn btnGhost" id="voiceBtn" type="button" title="Tap to start/stop" aria-label="Voice input" disabled>🎙️</button>
+          <button class="btn btnPrimary" id="sendBtn" type="button" disabled>Send ✨</button>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // ---------------------------
+    // Config (✅ necessary changes)
+    // ---------------------------
+    // Default: same-origin (works when Flask serves index.html)
+    // Override by adding ?api=http://localhost:5000  (or your server URL)
+    // Example: http://localhost:5173/?api=http://localhost:5000
+    const params = new URLSearchParams(location.search);
+    const API_BASE = (params.get("api") || "").replace(/\/+$/, ""); // trim trailing slashes
+
+    const REGISTER_ENDPOINT = API_BASE + "/api/register";
+    const CHAT_ENDPOINT = API_BASE + "/api/chat";
+    const VOICE_ENDPOINT = API_BASE + "/api/analyze/voice";
+
+    // ---------------------------
+    // State
+    // ---------------------------
+    let userId = null;
+    let userName = "Friend";
+    let typingNode = null;
+
+    // Voice
+    let mediaRecorder = null;
+    let chunks = [];
+    let isRecording = false;
+
+    // ---------------------------
+    // Theme
+    // ---------------------------
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+      const icon = theme === "dark" ? "☀️" : "🌙";
+      document.getElementById("themeBtn").textContent = icon;
+      document.getElementById("modalThemeBtn").textContent = icon;
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      applyTheme(current === "dark" ? "light" : "dark");
+    }
+
+    (function initTheme() {
+      const saved = localStorage.getItem("theme");
+      if (saved) applyTheme(saved);
+      else applyTheme("dark");
+    })();
+
+    document.getElementById("themeBtn").addEventListener("click", toggleTheme);
+    document.getElementById("modalThemeBtn").addEventListener("click", toggleTheme);
+
+    // ---------------------------
+    // Helpers
+    // ---------------------------
+    function nowTime() {
+      const d = new Date();
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = String(text ?? "");
+      return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+      const m = document.getElementById("messages");
+      m.scrollTop = m.scrollHeight;
+    }
+
+    function setEnabled(enabled) {
+      document.getElementById("userInput").disabled = !enabled;
+      document.getElementById("sendBtn").disabled = !enabled;
+      document.getElementById("voiceBtn").disabled = !enabled;
+      document.getElementById("whoChip").textContent = enabled ? ("Chatting as " + userName) : "Not started";
+    }
+
+    function hideEmptyStateIfNeeded() {
+      const empty = document.getElementById("emptyState");
+      const rows = document.querySelectorAll(".msgRow");
+      if (rows.length > 1) empty.classList.add("hidden");
+    }
+
+    function autoResizeTextarea(el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 140) + "px";
+    }
+
+    // ---------------------------
+    // Intent buttons
+    // ---------------------------
+    function clearIntentButtons() {
+      const existing = document.getElementById("intentBar");
+      if (existing) existing.remove();
+    }
+
+    function renderIntentButtons(buttons) {
+      clearIntentButtons();
+      if (!buttons || !buttons.length) return;
+
+      const bar = document.createElement("div");
+      bar.id = "intentBar";
+      bar.className = "intentBar";
+
+      buttons.forEach((label) => {
+        const b = document.createElement("button");
+        b.className = "btn btnGhost";
+        b.type = "button";
+        b.textContent = label;
+        b.addEventListener("click", () => {
+          document.getElementById("userInput").value = label;
+          send();
+          clearIntentButtons();
+        });
+        bar.appendChild(b);
+      });
+
+      document.getElementById("intentMount").appendChild(bar);
+    }
+
+    // ---------------------------
+    // Message Rendering
+    // ---------------------------
+    function addMessage({ who, text, label }) {
+      const messages = document.getElementById("messages");
+
+      const row = document.createElement("div");
+      row.className = "msgRow " + who;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = (who === "user") ? "👤" : "🤗";
+
+      const wrap = document.createElement("div");
+      wrap.className = "bubbleWrap";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + (who === "user" ? "user" : "bot");
+      bubble.innerHTML = escapeHtml(text);
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `<span>${escapeHtml(label)}</span><span class="dot"></span><span>${nowTime()}</span>`;
+
+      if (who === "user") {
+        row.classList.add("user");
+        row.appendChild(wrap);
+        row.appendChild(avatar);
+      } else {
+        row.appendChild(avatar);
+        row.appendChild(wrap);
+      }
+
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+
+      messages.appendChild(row);
+      hideEmptyStateIfNeeded();
+      scrollToBottom();
+      return row;
+    }
+
+    function showTyping() {
+      if (typingNode) return;
+
+      const row = document.createElement("div");
+      row.className = "msgRow bot";
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = "🤗";
+
+      const wrap = document.createElement("div");
+      wrap.className = "bubbleWrap";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble bot";
+      bubble.innerHTML = `
+        <span class="typingDots" aria-label="Typing">
+          <span></span><span></span><span></span>
+        </span>
+      `;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `<span>Buddy</span><span class="dot"></span><span>${nowTime()}</span>`;
+
+      row.appendChild(avatar);
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+      row.appendChild(wrap);
+
+      document.getElementById("messages").appendChild(row);
+      typingNode = row;
+      hideEmptyStateIfNeeded();
+      scrollToBottom();
+    }
+
+    function hideTyping() {
+      if (!typingNode) return;
+      typingNode.remove();
+      typingNode = null;
+    }
+
+    // ---------------------------
+    // Register / Start
+    // ---------------------------
+    async function start() {
+      const nameEl = document.getElementById("nameInput");
+      userName = (nameEl?.value || "").trim() || "Friend";
+      document.getElementById("whoChip").textContent = "Starting…";
+
+      try {
+        const res = await fetch(REGISTER_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: userName })
+        });
+
+        const raw = await res.text();
+        let data = {};
+        try { data = JSON.parse(raw); } catch { data = {}; }
+
+        if (!res.ok || !data.user_id) {
+          throw new Error((data && data.error) ? data.error : raw.slice(0, 400));
+        }
+
+        userId = data.user_id;
+
+        // hide modal + enable chat
+        document.getElementById("modal").classList.add("hidden");
+        setEnabled(true);
+
+        addMessage({
+          who: "bot",
+          label: "Buddy",
+          text: `Welcome, ${userName}. I’m here with you. What’s been sitting on your mind lately?`
+        });
+
+        setTimeout(() => document.getElementById("userInput")?.focus(), 120);
+      } catch (err) {
+        console.error("[start] register failed:", err);
+        document.getElementById("whoChip").textContent = "Could not start";
+        alert("Register failed:\n\n" + (err.message || String(err)));
+      }
+    }
+
+    // ---------------------------
+    // Send Text
+    // ---------------------------
+    async function send() {
+      if (!userId) {
+        alert("Please click Start first.");
+        return;
+      }
+
+      const input = document.getElementById("userInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      clearIntentButtons();
+      addMessage({ who: "user", label: userName, text: msg });
+
+      input.value = "";
+      autoResizeTextarea(input);
+
+      showTyping();
+
+      try {
+        const res = await fetch(CHAT_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, message: msg, user_name: userName })
+        });
+
+        const raw = await res.text();
+        let data = {};
+        try { data = JSON.parse(raw); } catch { data = {}; }
+
+        if (!res.ok) {
+          throw new Error((data && data.error) ? data.error : raw.slice(0, 400));
+        }
+
+        hideTyping();
+        addMessage({ who: "bot", label: "Buddy", text: data.response ?? "I’m here. Tell me more." });
+        renderIntentButtons(data.buttons || []);
+      } catch (err) {
+        hideTyping();
+        addMessage({ who: "bot", label: "Buddy", text: "Backend error: " + (err.message || "Unknown error") });
+      }
+    }
+
+    // ---------------------------
+    // Voice Recording + Upload (✅ necessary changes)
+    // ---------------------------
+    function setRecordingUI(on) {
+      const status = document.getElementById("recordStatus");
+      const btn = document.getElementById("voiceBtn");
+      if (on) {
+        status.classList.remove("hidden");
+        btn.textContent = "⏹️";
+        btn.title = "Stop recording";
+      } else {
+        status.classList.add("hidden");
+        btn.textContent = "🎙️";
+        btn.title = "Voice input";
+      }
+    }
+
+    function extFromMime(mime) {
+      const m = (mime || "").toLowerCase();
+      if (m.includes("ogg")) return "ogg";
+      if (m.includes("wav")) return "wav";
+      if (m.includes("mp4")) return "mp4";
+      // default for most browsers
+      return "webm";
+    }
+
+    async function ensureRecorder() {
+      if (mediaRecorder) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Voice recording is not supported in this browser.");
+        return false;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+        "audio/ogg",
+        "audio/wav"
+      ];
+      const mimeType = candidates.find(t => MediaRecorder.isTypeSupported(t)) || "";
+
+      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const mime = mediaRecorder.mimeType || "audio/webm";
+        const blob = new Blob(chunks, { type: mime });
+        const ext = extFromMime(mime);
+
+        chunks = [];
+        isRecording = false;
+        setRecordingUI(false);
+
+        if (!userId) return;
+
+        clearIntentButtons();
+        showTyping();
+
+        try {
+          const fd = new FormData();
+          // ✅ filename matches actual mime container
+          fd.append("audio", blob, `voice.${ext}`);
+          fd.append("user_id", userId);
+          fd.append("user_name", userName);
+
+          const res = await fetch(VOICE_ENDPOINT, { method: "POST", body: fd });
+
+          const raw = await res.text();
+          let data = {};
+          try { data = JSON.parse(raw); } catch { data = {}; }
+
+          if (!res.ok) throw new Error(data.error || raw.slice(0, 400));
+
+          hideTyping();
+
+          const transcript = data.transcript || data.text || data.message || null;
+          const reply = data.response || data.reply || data.bot || data.result || null;
+
+          if (transcript) addMessage({ who: "user", label: userName, text: transcript });
+          else addMessage({ who: "user", label: userName, text: "🎙️ (voice message sent)" });
+
+          addMessage({ who: "bot", label: "Buddy", text: reply ?? "I heard you. Want to tell me a bit more?" });
+          renderIntentButtons(data.buttons || []);
+        } catch (err) {
+          hideTyping();
+          addMessage({ who: "bot", label: "Buddy", text: "Voice failed: " + (err.message || "Unknown error") });
+        }
+      };
+
+      return true;
+    }
+
+    async function toggleRecording() {
+      if (!userId) {
+        alert("Please click Start first.");
+        return;
+      }
+
+      const ok = await ensureRecorder();
+      if (!ok) return;
+
+      if (!isRecording) {
+        chunks = [];
+        isRecording = true;
+        setRecordingUI(true);
+        mediaRecorder.start();
+      } else {
+        mediaRecorder.stop();
+      }
+    }
+
+    // ---------------------------
+    // Wire up events
+    // ---------------------------
+    document.getElementById("startBtn").addEventListener("click", start);
+    document.getElementById("sendBtn").addEventListener("click", send);
+    document.getElementById("voiceBtn").addEventListener("click", toggleRecording);
+
+    document.getElementById("userInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    document.getElementById("nameInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") start();
+    });
+
+    document.getElementById("userInput").addEventListener("input", (e) => autoResizeTextarea(e.target));
+
+    document.getElementById("bootTime").textContent = nowTime();
+
+    // disable until started
+    setEnabled(false);
+
+    // Optional: show which API base is being used (debug-friendly)
+    // console.log("API_BASE =", API_BASE || "(same-origin)");
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+.env
+.env.*
+*.key
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+*.wav
+*.webm
+
+.DS_Store
