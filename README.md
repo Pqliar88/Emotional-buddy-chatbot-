@@ -18,7 +18,7 @@ User → Frontend → Flask API
 ### 1. Clone
 ```bash
 git clone https://github.com/Pqliar88/Emotional-buddy-chatbot-.git
-cd emotion-first-chatbot
+cd Emotional-buddy-chatbot-
 ```
 ### 2. Create venv
 ```
@@ -33,9 +33,15 @@ pip install -r requirements.txt
 ```
 cp .env.example .env
 ```
-### 5. Run
+Edit .env and set your LLM provider credentials.
+
+### 5. Run the server
 ```
 python app.py
+```
+Server will start at:
+```
+http://localhost:5000
 ```
 
 ## API Endpoints
